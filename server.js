@@ -17,7 +17,6 @@ const logger = (req, res, next) => {
 };
 
 // use middleware
-
 app.use(logger);
 
 app.use("/api/v1/bootcamps", bootcampsRouter);
