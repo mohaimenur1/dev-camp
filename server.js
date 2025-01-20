@@ -12,6 +12,9 @@ connectDb();
 // initialize express app
 const app = express();
 
+//body perser
+app.use(express.json());
+
 // middleware
 const logger = (req, res, next) => {
   console.log(
