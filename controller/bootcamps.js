@@ -2,6 +2,7 @@
 //  @route  Get /api/v1/bootcamps
 
 const Bootcamps = require("../models/Bootcamps");
+const ErrorResponse = require("../utils/errorResponse");
 
 //  @access Public
 exports.getBootcamps = async (req, res, next) => {
@@ -13,11 +14,12 @@ exports.getBootcamps = async (req, res, next) => {
       message: "Bootcamps data retrive Successfully",
       data: getBootcamps,
     });
-  } catch (error) {
-    res.status(500).json({
-      code: 500,
-      message: "An error occurred while fetching data. Please try again later.",
-    });
+  } catch (err) {
+    // res.status(500).json({
+    //   code: 500,
+    //   message: "An error occurred while fetching data. Please try again later.",
+    // });
+    next(err);
   }
 };
 
@@ -27,19 +29,23 @@ exports.getBootcamps = async (req, res, next) => {
 exports.getSingleBootcamps = async (req, res, next) => {
   try {
     const singleBootcamp = await Bootcamps.findById(req.params.id);
-    res.status(200).json({ code: 200, message: "Get Single bootcamp" });
 
     if (!singleBootcamp) {
-      return res.status(404).json({
-        success: false,
-        message: `Resource not found with id: ${req.params.id}`,
-      });
+      return next(
+        new ErrorResponse(`Bootcamp not found with id of ${req.params.id}`, 404)
+      );
     }
-  } catch (error) {
-    res.status(404).json({
-      success: false,
-      message: `Resource not found with id: ${req.params.id}`,
+
+    res.status(200).json({
+      code: 200,
+      message: "Get Single bootcamp",
+      data: singleBootcamp,
     });
+  } catch (err) {
+    // next(
+    //   new ErrorResponse(`Bootcamp not found with id of ${req.params.id}`, 404)
+    // );
+    next(err);
   }
 };
 
@@ -55,10 +61,11 @@ exports.createBootcamps = async (req, res, next) => {
       message: "Create bootcamp",
       data: bootcamp,
     });
-  } catch (error) {
-    res
-      .status(400)
-      .json({ success: false, message: "Bootcamp name never been dublicate!" });
+  } catch (err) {
+    // res
+    //   .status(400)
+    //   .json({ success: false, message: "Bootcamp name never been dublicate!" });
+    next(err);
   }
 };
 //  @desc   update bootcamps
@@ -67,11 +74,11 @@ exports.createBootcamps = async (req, res, next) => {
 exports.updateBootcamps = async (req, res, next) => {
   try {
     const updateBootcamp = await Bootcamps.findByIdAndUpdate(
-      req.params.id,
-      req.body,
+      req.params.id, //who's id
+      req.body, // what thing to send
       {
         new: true,
-        runValidatorsr: true,
+        runValidatorsr: true, // options
       }
     );
 
@@ -84,11 +91,12 @@ exports.updateBootcamps = async (req, res, next) => {
     res
       .status(200)
       .json({ code: 200, message: "Update bootcamp", data: updateBootcamp });
-  } catch (error) {
-    return res.status(400).json({
-      sucess: false,
-      message: "Requested id is not match",
-    });
+  } catch (err) {
+    // return res.status(400).json({
+    //   sucess: false,
+    //   message: "Requested id is not match",
+    // });
+    next(err);
   }
 };
 //  @desc   delete bootcamps
@@ -103,11 +111,12 @@ exports.deleteBootcamps = async (req, res, next) => {
         message: "Requested id is not match!",
       });
     }
-    res.status(200).json({ code: 201, message: "Delete bootcamp" });
-  } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message: "Requested id is not match!",
-    });
+    res.status(200).json({ code: 200, message: "Delete bootcamp" });
+  } catch (err) {
+    // return res.status(400).json({
+    //   success: false,
+    //   message: "Requested id is not match!",
+    // });
+    next(err);
   }
 };

@@ -2,6 +2,7 @@ const express = require("express");
 const dotenv = require("dotenv");
 const bootcampsRouter = require("./routes/bootcamps");
 const connectDb = require("./config/db");
+const errorHandler = require("./middleware/error");
 
 // load env vars
 dotenv.config({ path: "./config/config.env" });
@@ -12,6 +13,7 @@ connectDb();
 // initialize express app
 const app = express();
 
+// middleware
 //body perser
 app.use(express.json());
 
@@ -27,6 +29,11 @@ const logger = (req, res, next) => {
 app.use(logger);
 
 app.use("/api/v1/bootcamps", bootcampsRouter);
+app.get("*", (req, res) => {
+  res.send("Invalid Link!");
+});
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT;
 
