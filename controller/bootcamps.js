@@ -7,7 +7,14 @@ const ErrorResponse = require("../utils/errorResponse");
 //  @access Public
 exports.getBootcamps = async (req, res, next) => {
   try {
-    const getBootcamps = await Bootcamps.find();
+    let query;
+    let queryStr = JSON.stringify(req.query);
+    queryStr = queryStr.replace(
+      /\b(gt|gte|lt|lte|in)\b/g,
+      (match) => `$${match}`
+    );
+    query = JSON.parse(queryStr);
+    const getBootcamps = await Bootcamps.find(query);
     res.status(200).json({
       code: 200,
       count: getBootcamps.length,
