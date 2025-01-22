@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const axios = require("axios");
 
 const BootcampSchema = new mongoose.Schema({
   name: {
@@ -91,6 +92,48 @@ const BootcampSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+});
+
+// Pre-save middleware for geocoding
+BootcampSchema.pre("save", async function (next) {
+  try {
+    // Call the Positionstack API
+    const params = {
+      access_key: process.env.GEOCODER_API_KEY, // Ensure this is set in your .env
+      query: this.address,
+    };
+
+    const response = await axios.get(
+      "http://api.positionstack.com/v1/forward",
+      { params }
+    );
+
+    if (response.data && response.data.data && response.data.data.length > 0) {
+      const loc = response.data.data[0]; // Get the first result
+
+      // Set location fields
+      this.location = {
+        type: "Point",
+        coordinates: [loc.longitude, loc.latitude],
+        formattedAddress: loc.label,
+        street: loc.street || "",
+        city: loc.locality || "",
+        state: loc.region || "",
+        zipcode: loc.postal_code || "",
+        country: loc.country || "",
+      };
+
+      // Remove the address field as it's no longer needed
+      this.address = undefined;
+    } else {
+      console.log("No geocoding results found");
+    }
+
+    next();
+  } catch (error) {
+    console.error("Error in geocoding:", error.message);
+    next(error);
+  }
 });
 
 module.exports = mongoose.model("Bootcamps", BootcampSchema);

@@ -25,6 +25,7 @@ const errorHandler = (err, req, res, next) => {
     const message = Object.values(err.errors)
       .map((val) => val.message)
       .join(", ");
+    console.log(err.errors);
     error = new ErrorResponse(message, 400);
   }
 
