@@ -7,7 +7,15 @@ const ErrorResponse = require("../utils/errorResponse");
 //  @access Public
 exports.getBootcamps = async (req, res, next) => {
   try {
-    const getBootcamps = await Bootcamps.find();
+    let apiResponse = Bootcamps.find(req.query);
+
+    if (req.query.name) {
+      req.query.name = { $regex: req.query.name, $options: "i" };
+      apiResponse = apiResponse.sort(req.query.sort);
+    }
+
+    const getBootcamps = await apiResponse;
+    console.log("query params:", req.query);
     res.status(200).json({
       code: 200,
       count: getBootcamps.length,
@@ -15,10 +23,6 @@ exports.getBootcamps = async (req, res, next) => {
       data: getBootcamps,
     });
   } catch (err) {
-    // res.status(500).json({
-    //   code: 500,
-    //   message: "An error occurred while fetching data. Please try again later.",
-    // });
     next(err);
   }
 };

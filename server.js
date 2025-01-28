@@ -3,6 +3,7 @@ const dotenv = require("dotenv");
 const bootcampsRouter = require("./routes/bootcamps");
 const connectDb = require("./config/db");
 const errorHandler = require("./middleware/error");
+const coursesRouter = require("./routes/courses");
 
 // load env vars
 dotenv.config({ path: "./config/config.env" });
@@ -29,6 +30,7 @@ const logger = (req, res, next) => {
 app.use(logger);
 
 app.use("/api/v1/bootcamps", bootcampsRouter);
+app.use("/api/v1/courses", coursesRouter);
 app.get("*", (req, res) => {
   res.send("Invalid Link!");
 });
