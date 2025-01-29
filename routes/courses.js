@@ -3,12 +3,14 @@ const {
   getAllCourses,
   getSingleCourse,
   getCoursesFromBootcamp,
+  createCourse,
 } = require("../controller/courses");
 
 const router = express.Router({ mergeParams: true });
 
-router.get("/bootcamp/:bootcampId", getCoursesFromBootcamp);
 router.get("/", getAllCourses);
 router.get("/:id", getSingleCourse);
+router.post("/", createCourse);
+router.get("/bootcamp/:bootcampId", getCoursesFromBootcamp);
 
 module.exports = router;

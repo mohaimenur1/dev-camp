@@ -4,7 +4,8 @@ const Course = require("../models/Course");
 // get all courses
 exports.getAllCourses = async (req, res, next) => {
   try {
-    const courses = await Course.find(req.query);
+    const courses = await Course.find();
+    // .populate("bootcamp");
     res.status(200).json({
       success: true,
       message: "Successfully retrive data",
@@ -35,13 +36,27 @@ exports.getCoursesFromBootcamp = async (req, res, next) => {
   try {
     // const bootcampId = new mongoose.Types.ObjectId(req.params.id);
     const getResponse = await Course.find({
-      bootcamp: new mongoose.Types.ObjectId(req.params.id),
+      bootcamp: new mongoose.Types.ObjectId(req.params.bootcampId),
     });
     console.log("bootcamp", getResponse);
     console.log("params", req.params.bootcampId);
     res.status(200).json({
       success: true,
       message: `Successfully get courses from bootcamp id ${req.params.bootcampId}`,
+      data: getResponse,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// create course
+exports.createCourse = async (req, res, next) => {
+  try {
+    let getResponse = await Course.create(req.body);
+    res.status(201).json({
+      success: true,
+      message: "Course create successfully",
       data: getResponse,
     });
   } catch (error) {
