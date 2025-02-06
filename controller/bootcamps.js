@@ -3,6 +3,7 @@
 
 const Bootcamps = require("../models/Bootcamps");
 const ErrorResponse = require("../utils/errorResponse");
+const path = require("path");
 
 //  @access Public
 exports.getBootcamps = async (req, res, next) => {
@@ -11,7 +12,7 @@ exports.getBootcamps = async (req, res, next) => {
 
     if (req.query.name) {
       req.query.name = { $regex: req.query.name, $options: "i" };
-      apiResponse = apiResponse.sort(req.query.sort);
+      apiResponse = apiResponse.sort({ createdAt: -1 });
     }
 
     const getBootcamps = await apiResponse;
@@ -58,7 +59,43 @@ exports.getSingleBootcamps = async (req, res, next) => {
 //  @access Private
 exports.createBootcamps = async (req, res, next) => {
   try {
-    const bootcamp = await Bootcamps.create(req.body);
+    const { name, description, address, website, phone, careers } = req.body;
+    const { photo } = req.files;
+    console.log("photo==>", photo);
+    if (!req.files || Object.keys(req.files).length === 0) {
+      return res.status(400).json({
+        code: 400,
+        success: false,
+        message: "File is not uploaded!",
+      });
+    }
+
+    if (!photo.mimetype.startsWith("image")) {
+      return res.status(400).json({
+        code: 400,
+        success: false,
+        message: "File is not an image",
+      });
+    }
+
+    // define file name
+    let fileName = `photo_${photo.name}`;
+
+    // define upload path
+    let uploadPath = path.join(__dirname, "../public/uploads", fileName);
+
+    await photo.mv(uploadPath);
+
+    const bootcamp = await Bootcamps.create({
+      name,
+      description,
+      address,
+      website,
+      phone,
+      careers,
+      photo: fileName,
+    });
+
     res.status(201).json({
       code: 201,
       success: true,
@@ -66,9 +103,6 @@ exports.createBootcamps = async (req, res, next) => {
       data: bootcamp,
     });
   } catch (err) {
-    // res
-    //   .status(400)
-    //   .json({ success: false, message: "Bootcamp name never been dublicate!" });
     next(err);
   }
 };

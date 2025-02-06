@@ -4,6 +4,8 @@ const bootcampsRouter = require("./routes/bootcamps");
 const connectDb = require("./config/db");
 const errorHandler = require("./middleware/error");
 const coursesRouter = require("./routes/courses");
+const fileUpload = require("express-fileupload");
+const path = require("path");
 
 // load env vars
 dotenv.config({ path: "./config/config.env" });
@@ -18,6 +20,8 @@ const app = express();
 //body perser
 app.use(express.json());
 
+app.use(express.static(path.join(__dirname, "public/uploads")));
+
 // middleware
 const logger = (req, res, next) => {
   console.log(
@@ -28,6 +32,7 @@ const logger = (req, res, next) => {
 
 // use middleware
 app.use(logger);
+app.use(fileUpload());
 
 app.use("/api/v1/bootcamps", bootcampsRouter);
 app.use("/api/v1/courses", coursesRouter);
