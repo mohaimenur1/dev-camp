@@ -1,6 +1,7 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const bootcampsRouter = require("./routes/bootcamps");
+const userRegisterRouter = require("./routes/auth");
 const connectDb = require("./config/db");
 const errorHandler = require("./middleware/error");
 const coursesRouter = require("./routes/courses");
@@ -36,6 +37,8 @@ app.use(fileUpload());
 
 app.use("/api/v1/bootcamps", bootcampsRouter);
 app.use("/api/v1/courses", coursesRouter);
+app.use("/api/v1/auth", userRegisterRouter);
+
 app.get("*", (req, res) => {
   res.send("Invalid Link!");
 });
