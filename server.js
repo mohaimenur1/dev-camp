@@ -7,6 +7,7 @@ const errorHandler = require("./middleware/error");
 const coursesRouter = require("./routes/courses");
 const fileUpload = require("express-fileupload");
 const path = require("path");
+const cookieParser = require("cookie-parser");
 
 // load env vars
 dotenv.config({ path: "./config/config.env" });
@@ -16,6 +17,7 @@ connectDb();
 
 // initialize express app
 const app = express();
+app.use(cookieParser());
 
 // middleware
 //body perser

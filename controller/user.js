@@ -73,3 +73,12 @@ exports.loginUser = async (req, res, next) => {
     next(err);
   }
 };
+
+// get token from model, create cookie and send response
+const sendTokenResponse = (user, statusCode, res) => {
+  const token = user.getSignedJwtToken();
+
+  const options = {
+    expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRE),
+  };
+};
