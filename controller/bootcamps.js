@@ -60,32 +60,33 @@ exports.getSingleBootcamps = async (req, res, next) => {
 exports.createBootcamps = async (req, res, next) => {
   try {
     const { name, description, address, website, phone, careers } = req.body;
-    const { photo } = req.files;
-    console.log("photo==>", photo);
-    if (!req.files || Object.keys(req.files).length === 0) {
-      return res.status(400).json({
-        code: 400,
-        success: false,
-        message: "File is not uploaded!",
-      });
+
+    let fileName = null; // Initialize fileName as null
+
+    // Check if a file was uploaded
+    if (req.files && req.files.photo) {
+      const { photo } = req.files;
+
+      // Validate file type (ensure it's an image)
+      if (!photo.mimetype.startsWith("image")) {
+        return res.status(400).json({
+          code: 400,
+          success: false,
+          message: "File is not an image",
+        });
+      }
+
+      // Define file name
+      fileName = `photo_${Date.now()}${path.extname(photo.name)}`;
+
+      // Define upload path
+      const uploadPath = path.join(__dirname, "../public/uploads", fileName);
+
+      // Move the file to the upload path
+      await photo.mv(uploadPath);
     }
 
-    if (!photo.mimetype.startsWith("image")) {
-      return res.status(400).json({
-        code: 400,
-        success: false,
-        message: "File is not an image",
-      });
-    }
-
-    // define file name
-    let fileName = `photo_${photo.name}`;
-
-    // define upload path
-    let uploadPath = path.join(__dirname, "../public/uploads", fileName);
-
-    await photo.mv(uploadPath);
-
+    // Create the bootcamp in the database
     const bootcamp = await Bootcamps.create({
       name,
       description,
@@ -93,13 +94,14 @@ exports.createBootcamps = async (req, res, next) => {
       website,
       phone,
       careers,
-      photo: fileName,
+      photo: fileName, // Save the file name (or null if no file was uploaded)
     });
 
+    // Send success response
     res.status(201).json({
       code: 201,
       success: true,
-      message: "Create bootcamp",
+      message: "Bootcamp created successfully!",
       data: bootcamp,
     });
   } catch (err) {

@@ -16,16 +16,7 @@ exports.registerUser = async (req, res, next) => {
       role,
     });
 
-    //CREATE token
-    const token = user.getSignedJwtToken();
-
-    res.status(201).json({
-      code: 200,
-      success: true,
-      message: "Token generated",
-      token,
-      data: user,
-    });
+    sendTokenResponse(user, 200, res);
   } catch (err) {
     next(err);
   }
@@ -60,15 +51,7 @@ exports.loginUser = async (req, res, next) => {
       return next(new ErrorResponse("Invalid credentials", 401));
     }
 
-    //CREATE token
-    const token = user.getSignedJwtToken();
-
-    res.status(201).json({
-      code: 200,
-      success: true,
-      message: "Token generated",
-      token,
-    });
+    sendTokenResponse(user, 200, res);
   } catch (err) {
     next(err);
   }
@@ -79,6 +62,26 @@ const sendTokenResponse = (user, statusCode, res) => {
   const token = user.getSignedJwtToken();
 
   const options = {
-    expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRE),
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRE * 24 * 60 * 60 * 1000
+    ),
+    httpOnly: true,
   };
+  res.status(statusCode).cookie("token", token, options).json({
+    success: true,
+    token,
+  });
+};
+
+//  @desc   Get current logged in user
+//  @route  post /api/v1/auth/me
+//  @access Private
+exports.getMe = async (req, res, next) => {
+  const user = await userModel.findById(req.user.id);
+
+  res.status(200).json({
+    code: 200,
+    success: true,
+    data: user,
+  });
 };

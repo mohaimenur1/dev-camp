@@ -7,14 +7,15 @@ const {
   updateCourses,
   deleteCourse,
 } = require("../controller/courses");
+const { protect } = require("../middleware/auth");
 
 const router = express.Router({ mergeParams: true });
 
 router.get("/", getAllCourses);
 router.get("/:id", getSingleCourse);
-router.post("/", createCourse);
+router.post("/", protect, createCourse);
 router.get("/bootcamp/:bootcampId", getCoursesFromBootcamp);
-router.put("/:id", updateCourses);
-router.delete("/:id", deleteCourse);
+router.put("/:id", protect, updateCourses);
+router.delete("/:id", protect, deleteCourse);
 
 module.exports = router;
