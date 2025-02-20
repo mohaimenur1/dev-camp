@@ -85,3 +85,24 @@ exports.getMe = async (req, res, next) => {
     data: user,
   });
 };
+
+//  @desc   Forgot password
+//  @route  post /api/v1/auth/forgotpassword
+//  @access Public
+exports.forgotPassword = async (req, res, next) => {
+  const user = await userModel.findOne({ email: req.body.email });
+
+  // check if user exists
+  if (!user) {
+    return next(new ErrorResponse("There is no user with that email", 404));
+  }
+
+  // get reset token
+  const resetToken = user.getResetPasswordToken();
+
+  res.status(200).json({
+    code: 200,
+    success: true,
+    data: user,
+  });
+};
