@@ -165,6 +165,21 @@ exports.deleteBootcamps = async (req, res, next) => {
         message: "Requested id is not match!",
       });
     }
+
+    // Only admin or the owner publisher can delete the bootcamp
+    if (
+      req.user.role !== "admin" &&
+      (req.user.role !== "publisher" ||
+        updateBootcamp.user.toString() !== req.user.id)
+    ) {
+      return next(
+        new ErrorResponse(
+          `User ${req.user.id} is not authorized to update this bootcamp`,
+          401
+        )
+      );
+    }
+
     res.status(200).json({ code: 200, message: "Delete bootcamp" });
   } catch (err) {
     // return res.status(400).json({
