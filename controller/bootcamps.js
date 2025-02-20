@@ -95,6 +95,7 @@ exports.createBootcamps = async (req, res, next) => {
       phone,
       careers,
       photo: fileName, // Save the file name (or null if no file was uploaded)
+      user: req.user.id,
     });
 
     // Send success response
@@ -113,29 +114,42 @@ exports.createBootcamps = async (req, res, next) => {
 //  @access Private
 exports.updateBootcamps = async (req, res, next) => {
   try {
-    const updateBootcamp = await Bootcamps.findByIdAndUpdate(
-      req.params.id, //who's id
-      req.body, // what thing to send
-      {
-        new: true,
-        runValidatorsr: true, // options
-      }
-    );
+    const updateBootcamp = await Bootcamps.findById(req.params.id);
 
     if (!updateBootcamp) {
       return res.status(400).json({
-        sucess: false,
-        message: "Requested id is not match",
+        success: false,
+        message: "Requested ID does not match any bootcamp",
       });
     }
-    res
-      .status(200)
-      .json({ code: 200, message: "Update bootcamp", data: updateBootcamp });
+
+    // Only admin or the owner publisher can update the bootcamp
+    if (
+      req.user.role !== "admin" &&
+      (req.user.role !== "publisher" ||
+        updateBootcamp.user.toString() !== req.user.id)
+    ) {
+      return next(
+        new ErrorResponse(
+          `User ${req.user.id} is not authorized to update this bootcamp`,
+          401
+        )
+      );
+    }
+
+    // Perform the update
+    const updatedBootcamp = await Bootcamps.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+
+    res.status(200).json({
+      code: 200,
+      message: "Bootcamp updated successfully",
+      data: updatedBootcamp,
+    });
   } catch (err) {
-    // return res.status(400).json({
-    //   sucess: false,
-    //   message: "Requested id is not match",
-    // });
     next(err);
   }
 };
